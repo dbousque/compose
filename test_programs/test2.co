@@ -1,0 +1,30 @@
+
+
+class LinkedList:
+	Object[]	elts
+	int			last
+
+	def LinkedList():
+		LinkedList(2)
+
+	def LinkedList(int size):
+		elts = Object[size]
+		last = 0
+
+	def doubleSize():
+		new_elts = Object[elts.len * 2]
+		for i=0 -> elts.len:
+			new_elts[i] = elts[i]
+		elts = new_elts
+
+	def add(Object new_elt):
+		if last == elts.len:
+			doubleSize()
+		elts[last] = new_elt
+		last++
+
+	def iter():
+		return elts
+
+def main(str[] args):
+	linked_list = new LinkedList()

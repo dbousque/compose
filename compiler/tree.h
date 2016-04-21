@@ -10,6 +10,11 @@
 # define DOUBLE 5
 # define LONG 6
 # define VARIABLE 7
+# define CHAR 8
+# define LIST 9
+# define FUNCTION 10
+# define INDEX 11
+# define ARGUMENTS 12
 
 #include "../utils/utils.h"
 #include <stdio.h>

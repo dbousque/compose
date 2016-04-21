@@ -31,6 +31,8 @@ char	*type_to_str(char type)
 		return (ft_strdup("DOUBLE"));
 	else if (type == LONG)
 		return (ft_strdup("LONG"));
+	else if (type == CHAR)
+		return (ft_strdup("CHAR"));
 }
 
 void	print_tree(t_node *node)
@@ -45,6 +47,28 @@ void	print_tree(t_node *node)
 		printf("%s(DOUBLE)", node->repr);
 	else if (node->action == LONG)
 		printf("%s(LONG)", node->repr);
+	else if (node->action == CHAR)
+		printf("%s(CHAR)", node->repr);
+	else if (node->action == INDEX)
+	{
+		printf("INDEX(");
+		print_tree(node->right);
+		printf(" OF ");
+		print_tree(node->left);
+		printf(")");
+	}
+	else if (node->action == FUNCTION)
+	{
+		printf("%s(FUNCTION)(", node->left->repr);
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == ARGUMENTS)
+	{
+		print_tree(node->left);
+		printf(", ");
+		print_tree(node->right);
+	}
 	else if (node->action == VARIABLE)
 	{
 		if (node->type)
@@ -58,6 +82,8 @@ void	print_tree(t_node *node)
 		printf(" = ");
 		print_tree(node->right);
 	}
+	else if (node->action == LIST)
+		printf("[LIST/TYPE:%s]", type_to_str(node->type));
 	else
 	{
 		printf("UNKNOWN TYPE !!!\n");

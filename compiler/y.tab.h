@@ -50,15 +50,19 @@ extern int yydebug;
     DOUBLE_TYPE = 260,
     LONG_TYPE = 261,
     STR_TYPE = 262,
-    TAB = 263,
-    DEF = 264,
-    INT_DEF = 265,
-    STR_DEF = 266,
-    FLOAT_DEF = 267,
-    DOUBLE_DEF = 268,
-    LONG_DEF = 269,
-    VAR = 270,
-    RET = 271
+    CHAR_TYPE = 263,
+    TAB = 264,
+    DEF = 265,
+    INT_DEF = 266,
+    STR_DEF = 267,
+    FLOAT_DEF = 268,
+    DOUBLE_DEF = 269,
+    LONG_DEF = 270,
+    LIST_DEF = 271,
+    CHAR_DEF = 272,
+    FUNCTION_DEF = 273,
+    VAR = 274,
+    RET = 275
   };
 #endif
 /* Tokens.  */
@@ -67,15 +71,19 @@ extern int yydebug;
 #define DOUBLE_TYPE 260
 #define LONG_TYPE 261
 #define STR_TYPE 262
-#define TAB 263
-#define DEF 264
-#define INT_DEF 265
-#define STR_DEF 266
-#define FLOAT_DEF 267
-#define DOUBLE_DEF 268
-#define LONG_DEF 269
-#define VAR 270
-#define RET 271
+#define CHAR_TYPE 263
+#define TAB 264
+#define DEF 265
+#define INT_DEF 266
+#define STR_DEF 267
+#define FLOAT_DEF 268
+#define DOUBLE_DEF 269
+#define LONG_DEF 270
+#define LIST_DEF 271
+#define CHAR_DEF 272
+#define FUNCTION_DEF 273
+#define VAR 274
+#define RET 275
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -88,7 +96,7 @@ union YYSTYPE
 	char *tmp_str;
 	t_node *node;
 
-#line 92 "y.tab.h" /* yacc.c:1909  */
+#line 100 "y.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

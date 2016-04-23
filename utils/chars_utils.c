@@ -45,3 +45,33 @@ char	*ft_strdup(char *str)
 	}
 	return (res);
 }
+
+char	*ft_strjoin(char *str1, char *str2)
+{
+	int		i;
+	int		x;
+	char	*res;
+
+	i = 0;
+	while (str1[i])
+		i++;
+	x = 0;
+	while (str2[x])
+		x++;
+	if (!(res = (char*)malloc(sizeof(char) * (i + x + 1))))
+		malloc_error();
+	res[i + x] = '\0';
+	i = 0;
+	while (str1[i])
+	{
+		res[i] = str1[i];
+		i++;
+	}
+	x = 0;
+	while (str2[x])
+	{
+		res[i + x] = str2[x];
+		x++;
+	}
+	return (res);
+}

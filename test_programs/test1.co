@@ -12,3 +12,4 @@ def main(str[] args):
 	for elt in args:
 		print(elt)
 		print(first_function(2, 5))
+	print("ok")

@@ -62,7 +62,13 @@ extern int yydebug;
     CHAR_DEF = 272,
     FUNCTION_DEF = 273,
     VAR = 274,
-    RET = 275
+    RET = 275,
+    IF = 276,
+    WHILE = 277,
+    FOR = 278,
+    IN = 279,
+    RIGHT_ARROW = 280,
+    EQUALITY = 281
   };
 #endif
 /* Tokens.  */
@@ -84,6 +90,12 @@ extern int yydebug;
 #define FUNCTION_DEF 273
 #define VAR 274
 #define RET 275
+#define IF 276
+#define WHILE 277
+#define FOR 278
+#define IN 279
+#define RIGHT_ARROW 280
+#define EQUALITY 281
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -92,11 +104,10 @@ union YYSTYPE
 {
 #line 14 "grammar.y" /* yacc.c:1909  */
 
-	char type;
 	char *tmp_str;
 	t_node *node;
 
-#line 100 "y.tab.h" /* yacc.c:1909  */
+#line 111 "y.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

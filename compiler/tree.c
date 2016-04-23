@@ -2,7 +2,7 @@
 
 #include "tree.h"
 
-t_node	*new_node(char action, t_node *left, t_node *right, char *repr, char type)
+t_node	*new_node(char action, t_node *left, t_node *right, char *repr, t_node *type)
 {
 	t_node	*node;
 
@@ -19,20 +19,33 @@ t_node	*new_node(char action, t_node *left, t_node *right, char *repr, char type
 	return (node);
 }
 
-char	*type_to_str(char type)
+t_sub_elt	*new_sub_elt(void *elt, char type)
 {
-	if (type == INTEGER)
+	t_sub_elt	*sub_elt;
+
+	if (!(sub_elt = (t_sub_elt*)malloc(sizeof(t_sub_elt))))
+		malloc_error();
+	sub_elt->type = type;
+	sub_elt->elt = elt;
+	return (sub_elt);
+}
+
+char	*type_to_str(t_node *type)
+{
+	if (type->action == INTEGER)
 		return (ft_strdup("INTEGER"));
-	else if (type == STRING)
+	else if (type->action == STRING)
 		return (ft_strdup("STRING"));
-	else if (type == FLOATING)
+	else if (type->action == FLOATING)
 		return (ft_strdup("FLOATING"));
-	else if (type == DOUBLE)
+	else if (type->action == DOUBLE)
 		return (ft_strdup("DOUBLE"));
-	else if (type == LONG)
+	else if (type->action == LONG)
 		return (ft_strdup("LONG"));
-	else if (type == CHAR)
+	else if (type->action == CHAR)
 		return (ft_strdup("CHAR"));
+	else if (type->action == LIST)
+		return (ft_strjoin(type_to_str(type->type), "[ARR]"));
 }
 
 void	print_tree(t_node *node)
@@ -82,11 +95,160 @@ void	print_tree(t_node *node)
 		printf(" = ");
 		print_tree(node->right);
 	}
+	else if (node->action == ADD)
+	{
+		printf("ADD(");
+		print_tree(node->left);
+		printf(", ");
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == MINUS)
+	{
+		printf("MINUS(");
+		print_tree(node->left);
+		printf(", ");
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == DIVIDE)
+	{
+		printf("DIVIDE(");
+		print_tree(node->left);
+		printf(", ");
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == MULTIPL)
+	{
+		printf("MULTIPL(");
+		print_tree(node->left);
+		printf(", ");
+		print_tree(node->right);
+		printf(")");
+	}
 	else if (node->action == LIST)
 		printf("[LIST/TYPE:%s]", type_to_str(node->type));
+	else if (node->action == SLICE)
+	{
+		printf("[SLICE/");
+		print_tree(node->left);
+		printf(" -> ");
+		print_tree(node->right);
+		printf("]");
+	}
+	else if (node->action == SLICE_INDEXES)
+	{
+		print_tree(node->left);
+		printf(" : ");
+		print_tree(node->right);
+	}
+	else if (node->action == CONDITION)
+	{
+		printf("IF(");
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == WHILE_LOOP)
+	{
+		printf("WHILE(");
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == FOR_LOOP1)
+	{
+		printf("FOR(");
+		print_tree(node->left);
+		printf(" -> ");
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == FOR_LOOP2)
+	{
+		printf("FOR(");
+		print_tree(node->left);
+		printf(" IN ");
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == EQUALITY_CHECK)
+	{
+		printf("IS_EQUAL(");
+		print_tree(node->left);
+		printf(", ");
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == GREATER_THAN)
+	{
+		printf("IS_GREATER(");
+		print_tree(node->left);
+		printf(", ");
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == SMALLER_THAN)
+	{
+		printf("IS_SMALLER(");
+		print_tree(node->left);
+		printf(", ");
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == GREATER_EQUAL)
+	{
+		printf("IS_GREATER_EQ(");
+		print_tree(node->left);
+		printf(", ");
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == SMALLER_EQUAL)
+	{
+		printf("IS_SMALLER_EQ(");
+		print_tree(node->left);
+		printf(", ");
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == RETURN)
+	{
+		printf("RETURN -> ");
+		print_tree(node->right);
+	}
+	else if (node->action == PRIORITY)
+	{
+		printf("PRIO(");
+		print_tree(node->right);
+		printf(")");
+	}
+	else if (node->action == FUNCTION_DECL)
+	{
+		printf("%s(FUNCTION_DECL)(", node->left->repr);
+		print_tree(node->right);
+		printf(")");
+		if (node->type)
+			printf("RET_TYPE->%s", type_to_str(node->type));
+	}
+	else if (node->action == FUNCTION_ARGS)
+	{
+		print_tree(node->left);
+		printf(", ");
+		print_tree(node->right);
+	}
 	else
 	{
 		printf("UNKNOWN TYPE !!!\n");
 		exit(1);
 	}
+}
+
+void	print_tree_indent(t_node *node, int indentation)
+{
+	while (indentation > 0)
+	{
+		printf("\t");
+		indentation--;
+	}
+	print_tree(node);
 }

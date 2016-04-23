@@ -12,6 +12,13 @@
 
 "return"					{return (RET);}
 "def"						{return (DEF);}
+"if"						{return (IF);}
+"for"						{return (FOR);}
+"while"						{return (WHILE);}
+"in"						{return (IN);}
+
+"->"						{return (RIGHT_ARROW);}
+"=="						{return (EQUALITY);}
 
 "int"						{return (INT_TYPE);}
 "double"					{return (DOUBLE_TYPE);}
@@ -22,7 +29,7 @@
 
 "\t"						{return (TAB);}
 
-\"[^\"]*\"					{yylval.tmp_str = ft_strdup(yytext); return (STR_DEF);}
+\"(\\.|[^\\"\n])*\"			{yylval.tmp_str = ft_strdup(yytext); return (STR_DEF);}
 [a-z][a-z_0-9]*\(			{yylval.tmp_str = ft_strdup(yytext); return (FUNCTION_DEF);}
 [a-z][a-z_0-9]*				{yylval.tmp_str = ft_strdup(yytext); return (VAR);}
 [0-9]+\.[0-9]+d				{yylval.tmp_str = ft_strdup(yytext); return (DOUBLE_DEF);}
@@ -33,8 +40,8 @@
 
 \[\]						{return (LIST_DEF);}
 
-[\[\]\+\-\*\/\(\),=ld\n]	{return (yytext[0]);}
-[ \r\v\f]					{ ; }
+[\[\]\+\-\*\/\(\),=ld\n:><]	{return (yytext[0]);}
+[ \r\v\f\t]					{ ; }
 .							{return(0);}
 
 %%

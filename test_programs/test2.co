@@ -27,4 +27,4 @@ class LinkedList:
 		return elts
 
 def main(str[] args):
-	linked_list = new LinkedList()
+	list = LinkedList()

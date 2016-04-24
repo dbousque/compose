@@ -1,11 +1,17 @@
 
 
+def second_func(int lol):
+	a = second_func(12)
+	return 24
+
 def first_function(int i, int a)->int:
 	b1 = 12
 	b2 = 2.0
-	int b5 = 43
+	b5 = 43
 	b3 = 12l
 	b4 = 2.0d
+	b5 = str(b3)
+	print(b5)
 	return i + a + b4
 
 def main(str[] args):

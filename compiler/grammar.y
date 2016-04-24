@@ -50,6 +50,8 @@ S		: ASSIGN							{top_node = $1;}
 
 FUNC_DEC: DEF FUNC DEC_ARGS ')' ':'			{$$ = new_node(FUNCTION_DECL, $2, $3, "", NULL);}
 		| DEF FUNC DEC_ARGS ')' RIGHT_ARROW TYPE_DEF ':'	{$$ = new_node(FUNCTION_DECL, $2, $3, "", $6);}
+		| DEF FUNC ')' ':'					{$$ = new_node(FUNCTION_DECL, $2, NULL, "", NULL);}
+		| DEF FUNC ')' RIGHT_ARROW TYPE_DEF ':'	{$$ = new_node(FUNCTION_DECL, $2, NULL, "", $5);}
 		;
 
 DEC_ARGS: DEC_ARGS ',' TYPE_DEF VARIA		{$4->type = $3;$$ = new_node(FUNCTION_ARGS, $1, $4, "", NULL);}

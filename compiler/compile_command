@@ -1,0 +1,1 @@
+yacc -d grammar.y && lex grammar.l && gcc y.tab.c lex.yy.c tree.c build_tree.c builtin_functions.c get_tree.c reading_errors.c read_source.c resolve_types.c ../utils/*.c

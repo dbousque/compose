@@ -225,7 +225,8 @@ void	print_tree(t_node *node)
 	else if (node->action == FUNCTION_DECL)
 	{
 		printf("%s(FUNCTION_DECL)(", node->left->repr);
-		print_tree(node->right);
+		if (node->right)
+			print_tree(node->right);
 		printf(")");
 		if (node->type)
 			printf("RET_TYPE->%s", type_to_str(node->type));

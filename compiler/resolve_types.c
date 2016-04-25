@@ -119,8 +119,17 @@ void	resolve_expression(t_linked_list *syntax_tree, t_node *expr, t_linked_list 
 	}
 	else if (expr->action == PRIORITY)
 	{
-		resolve_expression(expr->right);
+		resolve_expression(syntax_tree, expr->right, variables);
 		expr->type = expr->right->type;
+	}
+	else if (expr->action == FUNCTION)
+	{
+		resolve_expression(syntax_tree, expr->right, variables);
+		// find the return value of the function ...
+	}
+	else if (expr->action == ARGUMENTS)
+	{
+
 	}
 }
 

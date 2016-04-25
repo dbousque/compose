@@ -7,7 +7,6 @@ def second_func(int lol):
 def first_function(int i, int a)->int:
 	b1 = 12
 	b2 = 2.0
-	b5 = 43
 	b3 = 12l
 	b8 = ((3 + 5l) * 4 - 1) * 7
 	b4 = 2.0d

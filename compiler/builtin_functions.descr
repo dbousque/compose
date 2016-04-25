@@ -1,2 +1,12 @@
-print
-str
+VOID	print	INTEGER	_print_int
+VOID	print	STRING	_print_str
+VOID	print	CHAR	_print_char
+VOID	print	DOUBLE	_print_double
+VOID	print	FLOAT	_print_float
+VOID	print	LONG	_print_long
+STRING	str	INTEGER	_str_int
+STRING	str	STRING	_str_str
+STRING	str	DOUBLE	_str_double
+STRING	str	CHAR	_str_char
+STRING	str	FLOAT	_str_float
+STRING	str	LONG	_str_long

@@ -11,7 +11,7 @@
 # define LONG 6
 # define VARIABLE 7
 # define CHAR 8
-# define LIST 9
+# define LIST 100000
 # define FUNCTION 10
 # define INDEX 11
 # define ARGUMENTS 12
@@ -39,6 +39,7 @@
 # define INSTRUCTION 33
 
 #include "../utils/utils.h"
+#include "tree.h"
 #include <stdio.h>
 
 typedef struct		s_node
@@ -47,7 +48,7 @@ typedef struct		s_node
 	struct s_node	*left;
 	struct s_node	*right;
 	char			*repr;
-	struct s_node	*type;
+	int       type;
 }					t_node;
 
 typedef struct		s_sub_elt
@@ -56,7 +57,7 @@ typedef struct		s_sub_elt
 	void			*elt;
 }					t_sub_elt;
 
-t_node	*new_node(char action, t_node *left, t_node *right, char *repr, t_node *type);
+t_node	*new_node(char action, t_node *left, t_node *right, char *repr, int type);
 void	print_tree(t_node *node);
 void	print_tree_indent(t_node *node, int indentation);
 t_sub_elt	*new_sub_elt(void *elt, char type);

@@ -19,110 +19,136 @@ void	add_function_args(t_linked_list *function, t_linked_list *variables)
 	}
 }
 
-char	var_never_seen(char *var_name, t_linked_list *variables)
+char	var_in_list(char *var_name, t_linked_list *variables)
 {
 	int		i;
 
 	i = 0;
 	while (i < variables->len)
 	{
-		if (ft_strcmp(((t_node*)variables->elts[i])->repr, var_name) == 0)
-			return (0);
+		if (ft_strcmp(var_name, ((t_node*)variables->elts[i])->repr) == 0)
+			return (1);
 		i++;
 	}
-	return (1);
+	return (0);
 }
 
-char	is_a_value(char type)
+char	is_value(char action)
 {
-	if (type == INTEGER || type == CHAR || type == DOUBLE || type == LONG || type == FLOATING || type == STRING)
+	if (action == INTEGER || action == FLOATING || action == LONG || action == DOUBLE || action == STRING || action == CHAR)
 		return (1);
 	return (0);
 }
 
-int		resolve_expr_type(t_node *expr, t_linked_list *variables)
+char	is_operation(char action)
 {
-	(void)variables;
-	(void)expr;
-	if (is_a_value(expr->action))
-	{
-		expr->type = new_node(expr->action, NULL, NULL, "", NULL);
+	if (action == ADD || action == MINUS || action == DIVIDE || action == MULTIPL)
 		return (1);
-	}
 	return (0);
 }
 
-int		resolve_indent_block(t_linked_list *block, t_linked_list *variables, t_linked_list *function)
+char	in_chartab(int type, char numbers[])
 {
 	int		i;
 
-	(void)i;
-	(void)block;
-	(void)variables;
-	(void)function;
+	i = 0;
+	while (numbers[i])
+	{
+		if (numbers[i] == type)
+			return (1);
+		i++;
+	}
 	return (0);
 }
 
-int		resolve_function(t_linked_list *function)
+int		take_highest_number(int type1, int type2, char numbers[])
 {
-	t_node			*tmp_node;
-	int				i;
-	t_linked_list	*variables;
-	int				total_types_resolved;
+	int 	i;
 
-	total_types_resolved = 0;
+	i = 0;
+	while (numbers[i])
+		i++;
+	i--;
+	while (i >= 0)
+	{
+		if (type1 == numbers[i])
+			return (type1);
+		if (type2 == numbers[i])
+			return (type2);
+		i--;
+	}
+	return (0);
+}
+
+int		different_types_merge(int type1, int type2, char operation)
+{
+	char	numbers[] = {CHAR, INTEGER, LONG, FLOATING, DOUBLE, 0};
+
+	if (in_chartab(type1, numbers) && in_chartab(type2, numbers))
+		return (take_highest_number(type1, type2, numbers));
+	if (operation == ADD && type1 == STRING && type2 == STRING)
+		return (STRING);
+	if (operation == ADD && type1 == STRING && type2 == CHAR)
+		return (STRING);
+	return (0);
+}
+
+void	resolve_expression(t_linked_list *syntax_tree, t_node *expr, t_linked_list *variables)
+{
+	int		tmp_type1;
+	int		tmp_type2;
+
+	if (expr->action == ASSIGNEMENT)
+	{
+		resolve_expression(syntax_tree, expr->right, variables);
+		if (!expr->left->type || expr->left->type == expr->right->type)
+			expr->left->type = expr->right->type;
+		else
+		{
+			ft_putstr("Trying to assign from incompatible types.\n");
+			exit(1);
+		}
+		if (!var_in_list(expr->left->repr, variables))
+			add_to_list(variables, expr->left);
+	}
+	else if (is_operation(expr->action))
+	{
+		resolve_expression(syntax_tree, expr->left, variables);
+		resolve_expression(syntax_tree, expr->right, variables);
+		expr->type = different_types_merge(expr->left->type, expr->right->type, expr->action);
+	}
+	else if (expr->action == PRIORITY)
+	{
+		resolve_expression(expr->right);
+		expr->type = expr->right->type;
+	}
+}
+
+void	resolve_indent_block(t_linked_list *syntax_tree, t_linked_list *block, t_linked_list *variables)
+{
+	(void)syntax_tree;
+	(void)block;
+	(void)variables;
+}
+
+void	resolve_function(t_linked_list *syntax_tree, t_linked_list *function)
+{
+	t_linked_list	*variables;
+	int				i;
+
 	variables = new_list();
 	add_function_args(function, variables);
 	i = 0;
-	while (i < variables->len)
-	{
-		print_tree(variables->elts[i]);
-		printf("\n");
-		i++;
-	}
-	i = 1;
 	while (i < function->len)
 	{
+		// if it's an indent block
 		if (((t_sub_elt*)function->elts[i])->type == INDENT_BLOCK)
-			total_types_resolved += resolve_indent_block(((t_sub_elt*)function->elts[i])->elt, variables, function);
-		else if (((t_sub_elt*)function->elts[i])->type == INSTRUCTION)
-		{
-			tmp_node = ((t_node*)((t_sub_elt*)function->elts[i])->elt);
-			if (tmp_node->action == ASSIGNEMENT)
-			{
-				total_types_resolved += resolve_expr_type(tmp_node->right, variables);
-				if (!tmp_node->left->type || tmp_node->left->type == tmp_node->right->type)
-					tmp_node->left->type = tmp_node->right->type;
-				else
-				{
-					printf("Types don't match and can't be casted without losing precision.\n");
-					exit(1);
-				}
-				if (var_never_seen(tmp_node->left->repr, variables))
-					add_to_list(variables, tmp_node->left);
-			}
-			else if (tmp_node->action == RETURN)
-			{
-				total_types_resolved += resolve_expr_type(tmp_node->right, variables);
-				// find the type returned and set this type to the function prototype
-				if (((t_node*)((t_sub_elt*)function->elts[0])->elt)->type != 0 && tmp_node->right->type != 0
-							&& tmp_node->right->type != ((t_node*)((t_sub_elt*)function->elts[0])->elt)->type)
-				{
-					// type conflict
-					printf("Function return value type conflict.\n");
-					exit(1);
-				}
-				((t_node*)((t_sub_elt*)function->elts[0])->elt)->type = tmp_node->right->type;
-			}
-		}
+			resolve_indent_block(syntax_tree, ((t_sub_elt*)function->elts[i])->elt, variables);
 		else
-		{
-			printf("UNKNOWN SUB_ELT TYPE!!!\n");
-			exit(1);
-		}
+			resolve_expression(syntax_tree, ((t_sub_elt*)function->elts[i])->elt, variables);
 		i++;
 	}
-	printf("PROTOTYPE : \n");
+	printf("\nARGS:\n");
 	i = 0;
 	while (i < variables->len)
 	{
@@ -130,29 +156,16 @@ int		resolve_function(t_linked_list *function)
 		printf("\n");
 		i++;
 	}
-	printf("SPLIT");
-	//print_tree(prototype);
-	printf("\n");
-	return (total_types_resolved);
 }
 
 void	resolve_types(t_linked_list *syntax_tree)
 {
-	int		i;
-	int		nb_types_resolved;
-	int		tmp_nb;
+	int   i;
 
-	while (1)
+	i = 0;
+	while (i < syntax_tree->len)
 	{
-		i = 0;
-		nb_types_resolved = 0;
-		while (i < syntax_tree->len)
-		{
-			tmp_nb += resolve_function(((t_linked_list*)((t_sub_elt*)syntax_tree->elts[i])->elt));
-			i++;
-		}
-		if (tmp_nb <= nb_types_resolved)
-			break;
-		nb_types_resolved = tmp_nb;
+		resolve_function(syntax_tree, ((t_linked_list*)((t_sub_elt*)syntax_tree->elts[i])->elt));
+		i++;
 	}
 }

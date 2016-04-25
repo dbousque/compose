@@ -2,7 +2,7 @@
 
 #include "tree.h"
 
-t_node	*new_node(char action, t_node *left, t_node *right, char *repr, t_node *type)
+t_node	*new_node(char action, t_node *left, t_node *right, char *repr, int type)
 {
 	t_node	*node;
 
@@ -30,22 +30,22 @@ t_sub_elt	*new_sub_elt(void *elt, char type)
 	return (sub_elt);
 }
 
-char	*type_to_str(t_node *type)
+char	*type_to_str(int type)
 {
-	if (type->action == INTEGER)
+	if (type == INTEGER)
 		return (ft_strdup("INTEGER"));
-	else if (type->action == STRING)
+	else if (type == STRING)
 		return (ft_strdup("STRING"));
-	else if (type->action == FLOATING)
+	else if (type == FLOATING)
 		return (ft_strdup("FLOATING"));
-	else if (type->action == DOUBLE)
+	else if (type == DOUBLE)
 		return (ft_strdup("DOUBLE"));
-	else if (type->action == LONG)
+	else if (type == LONG)
 		return (ft_strdup("LONG"));
-	else if (type->action == CHAR)
+	else if (type == CHAR)
 		return (ft_strdup("CHAR"));
-	else if (type->action == LIST)
-		return (ft_strjoin(type_to_str(type->type), "[ARR]"));
+	else if (type >= 100000)
+		return (ft_strjoin(type_to_str(type - 100000), "[ARR]"));
 }
 
 void	print_tree(t_node *node)
@@ -126,9 +126,9 @@ void	print_tree(t_node *node)
 		printf(", ");
 		print_tree(node->right);
 		printf(")");
+		//else if (node->action == LIST)
+		//printf("[LIST/TYPE:%s]", type_to_str(node->type));
 	}
-	else if (node->action == LIST)
-		printf("[LIST/TYPE:%s]", type_to_str(node->type));
 	else if (node->action == SLICE)
 	{
 		printf("[SLICE/");

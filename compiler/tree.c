@@ -78,8 +78,11 @@ void	print_tree(t_node *node)
 	}
 	else if (node->action == ARGUMENTS)
 	{
-		print_tree(node->left);
-		printf(", ");
+		if (node->left)
+		{
+			print_tree(node->left);
+			printf(", ");
+		}
 		print_tree(node->right);
 	}
 	else if (node->action == VARIABLE)
@@ -233,8 +236,11 @@ void	print_tree(t_node *node)
 	}
 	else if (node->action == FUNCTION_ARGS)
 	{
-		print_tree(node->left);
-		printf(", ");
+		if (node->left)
+		{
+			print_tree(node->left);
+			printf(", ");
+		}
 		print_tree(node->right);
 	}
 	else

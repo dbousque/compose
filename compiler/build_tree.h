@@ -14,6 +14,8 @@
 
 # define READING_BUF_SIZE 1024
 
+extern t_linked_list *builtin_functions;
+
 t_node			*parse_line(char *line);
 char			*read_file_fast(char *filename, long *file_size);
 void			file_opening_error(void);
@@ -23,5 +25,6 @@ void			malloc_error(void);
 t_linked_list	*get_abstract_syntax_tree(char *filename);
 void			print_syntax_tree(t_linked_list *syntax_tree);
 void			resolve_types(t_linked_list *syntax_tree);
+void			resolve_function(t_linked_list *syntax_tree, t_stack *previous_functions);
 
 #endif

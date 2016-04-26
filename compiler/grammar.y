@@ -57,7 +57,7 @@ FUNC_DEC: DEF FUNC DEC_ARGS ')' ':'			{$$ = new_node(FUNCTION_DECL, $2, $3, "", 
 		;
 
 DEC_ARGS: DEC_ARGS ',' TYPE_DEF VARIA		{$4->type = $3;$$ = new_node(FUNCTION_ARGS, $1, $4, "", 0);}
-		| TYPE_DEF VARIA					{$2->type = $1;$$ = $2;}
+		| TYPE_DEF VARIA					{$2->type = $1;$$ = new_node(FUNCTION_ARGS, NULL, $2, "", 0);}
 		;
 
 RETUR	: RET EXPR							{$$ = new_node(RETURN, NULL, $2, "", 0);}
@@ -123,7 +123,7 @@ FUNCTIO	: FUNC ARGS ')'						{$$ = new_node(FUNCTION, $1, $2, "", 0);}
 		;
 
 ARGS	: ARGS ',' EXPR						{$$ = new_node(ARGUMENTS, $1, $3, "", 0);}
-		| EXPR								{$$ = $1;}
+		| EXPR								{$$ = new_node(ARGUMENTS, NULL, $1, "", 0);}
 		;
 
 FLOA	: FLOAT_DEF							{$$ = new_node(FLOATING, NULL, NULL, yylval.tmp_str, FLOATING);}

@@ -2,7 +2,7 @@
 
 #include "build_tree.h"
 
-extern t_linked_list *builtin_functions;
+t_linked_list *builtin_functions;
 
 void	add_function_args(t_linked_list *function, t_linked_list *variables)
 {
@@ -109,19 +109,130 @@ int		different_types_merge(int type1, int type2, char operation)
 	return (0);
 }
 
+int		get_builtin_type(t_node *function_call)
+{
+	int		i;
+	t_node	*tmp1;
+	t_node	*tmp2;
+	t_node	*tmp_func;
+	char	ok;
+
+	i = 0;
+	while (i < builtin_functions->len)
+	{
+		tmp_func = ((t_node*)builtin_functions->elts[i]);
+		if (ft_strcmp(function_call->left->repr, tmp_func->left->repr) == 0)
+		{
+			// test if the arguments types match
+			tmp1 = function_call->right;
+			tmp2 = tmp_func->right;
+			ok = 1;
+			while (ok && tmp1->left && tmp2->left)
+			{
+				if (tmp1->left->type != tmp2->left->type)
+					ok = 0;
+				tmp1 = tmp1->right;
+				tmp2 = tmp2->right;
+			}
+			// if arguments match
+			if (ok && !tmp1->left && !tmp2->left)
+				return (tmp_func->type);
+		}
+		i++;
+	}
+	ft_putstr("SHOULD NOT HAPPEN, BUILTIN FUNCTION NOT FOUND\n");
+	return (0);
+}
+
+char	is_builtin_function(t_node *function_call)
+{
+	int		i;
+	t_node	*tmp1;
+	t_node	*tmp2;
+	t_node	*tmp_func;
+	char	ok;
+
+	i = 0;
+	while (i < builtin_functions->len)
+	{
+		tmp_func = ((t_node*)builtin_functions->elts[i]);
+		if (ft_strcmp(function_call->left->repr, tmp_func->left->repr) == 0)
+		{
+			// test if the arguments types match
+			tmp1 = function_call->right;
+			tmp2 = tmp_func->right;
+			ok = 1;
+			while (ok && tmp1->left && tmp2->left)
+			{
+				if (tmp1->left->type != tmp2->left->type)
+					ok = 0;
+				tmp1 = tmp1->right;
+				tmp2 = tmp2->right;
+			}
+			// if arguments match
+			if (ok && !tmp1->left && !tmp2->left)
+				return (1);
+		}
+		i++;
+	}
+	return (0);
+}
+
+t_linked_list	*get_function_in_syntax_tree(t_linked_list *syntax_tree, t_node *function_call)
+{
+	// return a pointer to the function 
+	int		i;
+	t_node	*func_decl;
+
+	i = 0;
+	while (i < syntax_tree->len)
+	{
+		func_decl = ((t_linked_list*)syntax_tree->elts[i])->elts[0])->elt //not sure, check that
+		i++;
+	}
+	return (NULL);
+}
+
 void	find_function_and_resolve(t_linked_list *syntax_tree, t_stack *previous_functions, t_node *function_call)
 {
+	t_linked_list	*func;
+
 	// set the expression type to be the function return type
 	if (is_builtin_function(function_call))
 	{
 		// just look the return type up
+		function_call->type = get_builtin_type(function_call);
 	}
 	else
 	{
-		// look for this function is the syntax tree, and resolve the return type of it.
+		// look for this function in the syntax tree, and resolve the return type of it.
 		// If stuck in a loop (function calls itself, we can see that if the function is already in the previous_functions),
 		// then ignore the looping function call, and resolve all the rest. If the type of the return values can't be determined
-		// after that, then exit and ask the user to specify the return type of the function 
+		// after that, then exit and ask the user to specify the return type of the function
+		func = get_function_in_syntax_tree(syntax_tree, function_call);
+		if (func)
+		{
+			// if we already know the return type, no need to search for it
+			if (((t_node*)((t_sub_elt*)func->elts[0])->elt)->type)
+			{
+				function_call->type = ((t_node*)((t_sub_elt*)func->elts[0])->elt)->type;
+				return ;
+			}
+			if (function_in_previous_functions(previous_functions, function_call))
+			{
+				ft_putstr("Endless recursion.\n");
+				exit(1);
+			}
+			stack_push(previous_functions, func);
+			resolve_function(syntax_tree, previous_functions);
+			stack_pop(previous_functions);
+			function_call->type = ((t_node*)((t_sub_elt*)func->elts[0])->elt)->type;
+		}
+		else
+		{
+			ft_putstr("Undefined reference to a function.\n");
+			exit(1);
+		}
 	}
 }
 
@@ -168,9 +279,23 @@ void	resolve_expression(t_linked_list *syntax_tree, t_stack *previous_functions,
 		resolve_expression(syntax_tree, previous_functions, expr->right, variables);
 		resolve_expression(syntax_tree, previous_functions, expr->left, variables);
 	}
+	else if (expr->action == VARIABLE)
+	{
+		// find the variable referenced and assign its type to the node, if not found, reference to nothing, error
+		if (var_in_list(expr->repr, variables))
+			expr->type = typeof_var_in_list(expr->repr, variables);
+		else
+		{
+			ft_putstr("Variable referenced before assignement.\n");
+			exit(1);
+		}
+	}
 	else if (expr->action == RETURN)
 	{
 		// resolve the type returned and set the function (on top of previous_functions) return type
+		resolve_expression(syntax_tree, previous_functions, expr->right, variables);
+		expr->type = expr->right->type;
+		((t_node*)((t_sub_elt*)((t_linked_list*)previous_functions->elts[previous_functions->last - 1])->elts[0])->elt)->type = expr->type;
 	}
 }
 
@@ -180,6 +305,17 @@ void	resolve_indent_block(t_linked_list *syntax_tree, t_stack *previous_function
 	(void)block;
 	(void)variables;
 	(void)previous_functions;
+
+	// just do the same as in reolve function :
+	/*while (i < function->len)
+	{
+		// if it's an indent block
+		if (((t_sub_elt*)function->elts[i])->type == INDENT_BLOCK)
+			resolve_indent_block(syntax_tree, previous_functions, ((t_sub_elt*)function->elts[i])->elt, variables);
+		else
+			resolve_expression(syntax_tree, previous_functions, ((t_sub_elt*)function->elts[i])->elt, variables);
+		i++;
+	}*/
 }
 
 void	resolve_function(t_linked_list *syntax_tree, t_stack *previous_functions)
@@ -211,7 +347,7 @@ void	resolve_function(t_linked_list *syntax_tree, t_stack *previous_functions)
 	}
 }
 
-int		parse_array_type(char *type)
+int		parse_type(char *type)
 {
 	int		i;
 	int		res;
@@ -223,7 +359,7 @@ int		parse_array_type(char *type)
 	i--;
 	while (i >= 1 && type[i] == ']' && type[i - 1] == '[')
 	{
-		res += 100000;
+		res += LIST;
 		i -= 2;
 	}
 	type[i + 1] = '\0';
@@ -245,41 +381,43 @@ int		parse_array_type(char *type)
 t_node	*descr_to_node(char *descr)
 {
 	char	**tabs;
+	char	**args_type;
 	t_node	*res;
-	int		type;
+	int		ret_type;
 	t_node	*tmp_node;
+	t_node	*tmp_node2;
+	int		i;
 
 	// create a node with return type (tabs[0]), function name (tabs[1]) and arguments types (tab[2]),
 	// just like a normal FUNCTION_DECL node
 	tabs = split_on_char(descr, ft_strlen(descr), '\t');
-	if (ft_strcmp(tabs[0], "VOID") == 0)
-		type = 0;
-	else if (ft_strcmp(tabs[0], "INTEGER") == 0)
-		type = INTEGER;
-	else if (ft_strcmp(tabs[0], "STRING") == 0)
-		type = STRING;
-	else if (ft_strcmp(tabs[0], "CHAR") == 0)
-		type = CHAR;
-	else if (ft_strcmp(tabs[0], "DOUBLE") == 0)
-		type = DOUBLE;
-	else if (ft_strcmp(tabs[0], "FLOAT") == 0)
-		type = FLOATING;
-	else if (ft_strcmp(tabs[0], "LONG") == 0)
-		type = LONG;
+	ret_type = parse_type(tabs[0]);
+	args_type = split_on_char(tabs[2], ft_strlen(tabs[2]), ',');
+	if (ft_strcmp(args_type[0], "VOID") == 0)
+		tmp_node = NULL;
 	else
-		type = parse_array_type(tabs[0]);
-	res = new_node(FUNCTION_DECL, );
+	{
+		tmp_node = NULL;
+		i = 0;
+		while (args_type[i])
+		{
+			tmp_node2 = new_node(FUNCTION_ARGS, tmp_node, new_node(VARIABLE, NULL, NULL, "", parse_type(args_type[i])), "", 0);
+			tmp_node = tmp_node2;
+			i++;
+		}
+	}
+	res = new_node(FUNCTION_DECL, new_node(0, NULL, NULL, tabs[1], 0), tmp_node, "", ret_type);
+	return (res);
 }
 
-t_linked_list	*get_builtin_functions(void)
+void	get_builtin_functions(void)
 {
 	char			*content;
 	char			**functions;
 	long			size;
 	int				i;
-	t_linked_list	*builtin_funcs;
 
-	builtin_funcs = new_list();
+	builtin_functions = new_list();
 	content = read_file_fast("builtin_functions.descr", &size);
 	functions = split_on_char(content, size, '\n');
 	i = 0;
@@ -288,7 +426,6 @@ t_linked_list	*get_builtin_functions(void)
 		add_to_list(builtin_functions, descr_to_node(functions[i]));
 		i++;
 	}
-	return (builtin_funcs);
 }
 
 void	resolve_types(t_linked_list *syntax_tree)
@@ -296,7 +433,7 @@ void	resolve_types(t_linked_list *syntax_tree)
 	int		i;
 	t_stack	*tmp_functions;
 
-	builtin_functions = get_builtin_functions();
+	get_builtin_functions();
 	tmp_functions = new_stack();
 	i = 0;
 	while (i < syntax_tree->len)

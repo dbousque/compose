@@ -48,7 +48,7 @@ typedef struct		s_node
 	struct s_node	*left;
 	struct s_node	*right;
 	char			*repr;
-	int       type;
+	int				type;
 }					t_node;
 
 typedef struct		s_sub_elt

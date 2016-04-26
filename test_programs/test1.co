@@ -10,6 +10,7 @@ def first_function(int i, int a)->int:
 	b3 = 12l
 	b8 = ((3 + 5l) * 4 - 1) * 7
 	b4 = 2.0d
+	b7 = b3
 	b5 = str(b3)
 	print(b5)
 	return i + a + b4

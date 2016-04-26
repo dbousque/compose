@@ -1441,7 +1441,7 @@ yyreduce:
 
   case 15:
 #line 60 "grammar.y" /* yacc.c:1646  */
-    {(yyvsp[0].node)->type = (yyvsp[-1].type);(yyval.node) = (yyvsp[0].node);}
+    {(yyvsp[0].node)->type = (yyvsp[-1].type);(yyval.node) = new_node(FUNCTION_ARGS, NULL, (yyvsp[0].node), "", 0);}
 #line 1446 "y.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1657,7 +1657,7 @@ yyreduce:
 
   case 51:
 #line 126 "grammar.y" /* yacc.c:1646  */
-    {(yyval.node) = (yyvsp[0].node);}
+    {(yyval.node) = new_node(ARGUMENTS, NULL, (yyvsp[0].node), "", 0);}
 #line 1662 "y.tab.c" /* yacc.c:1646  */
     break;
 

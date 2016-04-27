@@ -10,3 +10,9 @@ STRING	str	DOUBLE	_str_double
 STRING	str	CHAR	_str_char
 STRING	str	FLOAT	_str_float
 STRING	str	LONG	_str_long
+INTEGER	int	INTEGER	_int_int
+INTEGER	int DOUBLE	_int_double
+INTEGER	int STRING	_int_str
+INTEGER	int FLOAT	_int_float
+INTEGER	int LONG	_int_long
+INTEGER	int	CHAR	_int_char

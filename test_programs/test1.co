@@ -13,7 +13,7 @@ def first_function(int i, int a)->int:
 	b7 = b3
 	b5 = str(b3)
 	print(b5)
-	return i + a + b4
+	return int(i + a + b4)
 
 def main(str[] args):
 	for elt in args:

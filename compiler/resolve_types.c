@@ -109,35 +109,43 @@ int		different_types_merge(int type1, int type2, char operation)
 	return (0);
 }
 
+int		are_function_equal(t_node *func1, t_node *func2)
+{
+	t_node	*tmp1;
+	t_node	*tmp2;
+	char	ok;
+
+	if (ft_strcmp(func1->left->repr, func2->left->repr) == 0)
+	{
+		// test if the arguments types match
+		tmp1 = func1->right;
+		tmp2 = func2->right;
+		ok = 1;
+		while (ok && tmp1->left && tmp2->left)
+		{
+			if (tmp1->left->type != tmp2->left->type)
+				ok = 0;
+			tmp1 = tmp1->right;
+			tmp2 = tmp2->right;
+		}
+		// if arguments match
+		if (ok && !tmp1->left && !tmp2->left)
+			return (1);
+	}
+	return (0);
+}
+
 int		get_builtin_type(t_node *function_call)
 {
 	int		i;
-	t_node	*tmp1;
-	t_node	*tmp2;
 	t_node	*tmp_func;
-	char	ok;
 
 	i = 0;
 	while (i < builtin_functions->len)
 	{
 		tmp_func = ((t_node*)builtin_functions->elts[i]);
-		if (ft_strcmp(function_call->left->repr, tmp_func->left->repr) == 0)
-		{
-			// test if the arguments types match
-			tmp1 = function_call->right;
-			tmp2 = tmp_func->right;
-			ok = 1;
-			while (ok && tmp1->left && tmp2->left)
-			{
-				if (tmp1->left->type != tmp2->left->type)
-					ok = 0;
-				tmp1 = tmp1->right;
-				tmp2 = tmp2->right;
-			}
-			// if arguments match
-			if (ok && !tmp1->left && !tmp2->left)
-				return (tmp_func->type);
-		}
+		if (are_function_equal(function_call, tmp_func))
+			return (tmp_func->type);
 		i++;
 	}
 	ft_putstr("SHOULD NOT HAPPEN, BUILTIN FUNCTION NOT FOUND\n");
@@ -147,32 +155,14 @@ int		get_builtin_type(t_node *function_call)
 char	is_builtin_function(t_node *function_call)
 {
 	int		i;
-	t_node	*tmp1;
-	t_node	*tmp2;
 	t_node	*tmp_func;
-	char	ok;
 
 	i = 0;
 	while (i < builtin_functions->len)
 	{
 		tmp_func = ((t_node*)builtin_functions->elts[i]);
-		if (ft_strcmp(function_call->left->repr, tmp_func->left->repr) == 0)
-		{
-			// test if the arguments types match
-			tmp1 = function_call->right;
-			tmp2 = tmp_func->right;
-			ok = 1;
-			while (ok && tmp1->left && tmp2->left)
-			{
-				if (tmp1->left->type != tmp2->left->type)
-					ok = 0;
-				tmp1 = tmp1->right;
-				tmp2 = tmp2->right;
-			}
-			// if arguments match
-			if (ok && !tmp1->left && !tmp2->left)
-				return (1);
-		}
+		if (are_function_equal(function_call, tmp_func))
+			return (1);
 		i++;
 	}
 	return (0);
@@ -187,10 +177,34 @@ t_linked_list	*get_function_in_syntax_tree(t_linked_list *syntax_tree, t_node *f
 	i = 0;
 	while (i < syntax_tree->len)
 	{
-		func_decl = ((t_linked_list*)syntax_tree->elts[i])->elts[0])->elt //not sure, check that
+		func_decl = ((t_node*)((t_sub_elt*)((t_linked_list*)((t_sub_elt*)syntax_tree->elts[i])->elt)->elts[0])->elt);
+		if (are_function_equal(func_decl, function_call))
+			return (((t_sub_elt*)(t_linked_list*)syntax_tree->elts[i])->elt);
 		i++;
 	}
 	return (NULL);
+}
+
+char	function_twice_in_previous_functions(t_stack *previous_functions, t_node *function_call)
+{
+	int		i;
+	t_node	*tmp_func;
+	char	nb;
+
+	nb = 0;
+	i = 0;
+	while (i < previous_functions->last)
+	{
+		tmp_func = ((t_node*)((t_sub_elt*)((t_linked_list*)previous_functions->elts[i])->elts[0])->elt);
+		if (are_function_equal(function_call, tmp_func))
+		{
+			nb++;
+			if (nb >= 2)
+				return (1);
+		}
+		i++;
+	}
+	return (0);
 }
 
 void	find_function_and_resolve(t_linked_list *syntax_tree, t_stack *previous_functions, t_node *function_call)
@@ -218,14 +232,20 @@ void	find_function_and_resolve(t_linked_list *syntax_tree, t_stack *previous_fun
 				function_call->type = ((t_node*)((t_sub_elt*)func->elts[0])->elt)->type;
 				return ;
 			}
-			if (function_in_previous_functions(previous_functions, function_call))
+			if (function_twice_in_previous_functions(previous_functions, function_call))
 			{
-				ft_putstr("Endless recursion.\n");
-				exit(1);
+				//ft_putstr("Endless recursion.\n");
+				//exit(1);
+				return ;
 			}
 			stack_push(previous_functions, func);
 			resolve_function(syntax_tree, previous_functions);
 			stack_pop(previous_functions);
+			if (!((t_node*)((t_sub_elt*)func->elts[0])->elt)->type)
+			{
+				ft_putstr("Could not resolve the return type of the function. You program is likely to contain an error, otherwise just specify the return type of the function.\n");
+				exit(1);
+			}
 			function_call->type = ((t_node*)((t_sub_elt*)func->elts[0])->elt)->type;
 		}
 		else
@@ -270,6 +290,8 @@ void	resolve_expression(t_linked_list *syntax_tree, t_stack *previous_functions,
 	}
 	else if (expr->action == FUNCTION)
 	{
+		printf("SALUT\n");
+		fflush(stdout);
 		resolve_expression(syntax_tree, previous_functions, expr->right, variables);
 		// find the return value of the function ...
 		find_function_and_resolve(syntax_tree, previous_functions, expr);
@@ -283,39 +305,66 @@ void	resolve_expression(t_linked_list *syntax_tree, t_stack *previous_functions,
 	{
 		// find the variable referenced and assign its type to the node, if not found, reference to nothing, error
 		if (var_in_list(expr->repr, variables))
+		{
 			expr->type = typeof_var_in_list(expr->repr, variables);
+			printf("expr->type : %d\n", expr->type);
+		}
 		else
 		{
 			ft_putstr("Variable referenced before assignement.\n");
 			exit(1);
 		}
 	}
+	else if (expr->action == FOR_LOOP2)
+	{
+		resolve_expression(syntax_tree, previous_functions, expr->right, variables);
+		if (!expr->left->type || expr->left->type == expr->right->type - LIST)
+		{
+			printf("val : %d\n", expr->right->type);
+			expr->left->type = expr->right->type - LIST;
+		}
+		else
+		{
+			ft_putstr("Trying to assign from incompatible types.\n");
+			exit(1);
+		}
+		if (!var_in_list(expr->left->repr, variables))
+			add_to_list(variables, expr->left);
+	}
 	else if (expr->action == RETURN)
 	{
 		// resolve the type returned and set the function (on top of previous_functions) return type
+		printf("BEFORE RESOLVING\n");
+		fflush(stdout);
 		resolve_expression(syntax_tree, previous_functions, expr->right, variables);
+		printf("AFTER RESOLVING\n");
+		fflush(stdout);
 		expr->type = expr->right->type;
+		if (((t_node*)((t_sub_elt*)((t_linked_list*)previous_functions->elts[previous_functions->last - 1])->elts[0])->elt)->type
+			&& ((t_node*)((t_sub_elt*)((t_linked_list*)previous_functions->elts[previous_functions->last - 1])->elts[0])->elt)->type != expr->type)
+		{
+			ft_putstr("Function return type conflict.\n");
+			exit(1);
+		}
 		((t_node*)((t_sub_elt*)((t_linked_list*)previous_functions->elts[previous_functions->last - 1])->elts[0])->elt)->type = expr->type;
 	}
 }
 
 void	resolve_indent_block(t_linked_list *syntax_tree, t_stack *previous_functions, t_linked_list *block, t_linked_list *variables)
 {
-	(void)syntax_tree;
-	(void)block;
-	(void)variables;
-	(void)previous_functions;
+	int		i;
 
+	i = 0;
 	// just do the same as in reolve function :
-	/*while (i < function->len)
+	while (i < block->len)
 	{
 		// if it's an indent block
-		if (((t_sub_elt*)function->elts[i])->type == INDENT_BLOCK)
-			resolve_indent_block(syntax_tree, previous_functions, ((t_sub_elt*)function->elts[i])->elt, variables);
+		if (((t_sub_elt*)block->elts[i])->type == INDENT_BLOCK)
+			resolve_indent_block(syntax_tree, previous_functions, ((t_sub_elt*)block->elts[i])->elt, variables);
 		else
-			resolve_expression(syntax_tree, previous_functions, ((t_sub_elt*)function->elts[i])->elt, variables);
+			resolve_expression(syntax_tree, previous_functions, ((t_sub_elt*)block->elts[i])->elt, variables);
 		i++;
-	}*/
+	}
 }
 
 void	resolve_function(t_linked_list *syntax_tree, t_stack *previous_functions)
@@ -341,10 +390,14 @@ void	resolve_function(t_linked_list *syntax_tree, t_stack *previous_functions)
 	i = 0;
 	while (i < variables->len)
 	{
+		printf("SALUTTTTT0\n");
+		fflush(stdout);
 		print_tree(variables->elts[i]);
 		printf("\n");
 		i++;
 	}
+	printf("SALUTTTTT\n");
+	fflush(stdout);
 }
 
 int		parse_type(char *type)
@@ -352,6 +405,7 @@ int		parse_type(char *type)
 	int		i;
 	int		res;
 
+	printf(" TYPE_STR -> %s\n", type);
 	res = 0;
 	i = 0;
 	while (type[i])
@@ -375,6 +429,7 @@ int		parse_type(char *type)
 		res += FLOATING;
 	else if (ft_strcmp(type, "LONG") == 0)
 		res += LONG;
+	printf("\n TYPE --> %d\n", res);
 	return (res);
 }
 
@@ -433,6 +488,8 @@ void	resolve_types(t_linked_list *syntax_tree)
 	int		i;
 	t_stack	*tmp_functions;
 
+	printf("CALLED\n");
+	fflush(stdout);
 	get_builtin_functions();
 	tmp_functions = new_stack();
 	i = 0;

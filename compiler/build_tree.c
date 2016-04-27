@@ -14,6 +14,7 @@ void	compile_file(char *filename)
 	syntax_tree = get_abstract_syntax_tree(filename);
 	print_syntax_tree(syntax_tree);
 	resolve_types(syntax_tree);
+	print_syntax_tree(syntax_tree);
 	(void)syntax_tree;
 }
 

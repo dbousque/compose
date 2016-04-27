@@ -32,6 +32,8 @@ t_sub_elt	*new_sub_elt(void *elt, char type)
 
 char	*type_to_str(int type)
 {
+	printf("TYPE_TO_STR : %d\n", type);
+	fflush(stdout);
 	if (type == INTEGER)
 		return (ft_strdup("INTEGER"));
 	else if (type == STRING)
@@ -44,8 +46,8 @@ char	*type_to_str(int type)
 		return (ft_strdup("LONG"));
 	else if (type == CHAR)
 		return (ft_strdup("CHAR"));
-	else if (type >= 100000)
-		return (ft_strjoin(type_to_str(type - 100000), "[ARR]"));
+	else if (type >= LIST)
+		return (ft_strjoin(type_to_str(type - LIST), "[ARR]"));
 }
 
 void	print_tree(t_node *node)
@@ -87,6 +89,8 @@ void	print_tree(t_node *node)
 	}
 	else if (node->action == VARIABLE)
 	{
+		printf("ICII\n");
+		fflush(stdout);
 		if (node->type)
 			printf("%s(VARIABLE/TYPE:%s)", node->repr, type_to_str(node->type));
 		else

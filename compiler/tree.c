@@ -32,8 +32,6 @@ t_sub_elt	*new_sub_elt(void *elt, char type)
 
 char	*type_to_str(int type)
 {
-	printf("TYPE_TO_STR : %d\n", type);
-	fflush(stdout);
 	if (type == INTEGER)
 		return (ft_strdup("INTEGER"));
 	else if (type == STRING)
@@ -89,8 +87,6 @@ void	print_tree(t_node *node)
 	}
 	else if (node->action == VARIABLE)
 	{
-		printf("ICII\n");
-		fflush(stdout);
 		if (node->type)
 			printf("%s(VARIABLE/TYPE:%s)", node->repr, type_to_str(node->type));
 		else

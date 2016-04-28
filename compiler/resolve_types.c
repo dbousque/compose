@@ -35,7 +35,7 @@ char	var_in_list(char *var_name, t_linked_list *variables)
 	return (0);
 }
 
-char	typeof_var_in_list(char *var_name, t_linked_list *variables)
+int		typeof_var_in_list(char *var_name, t_linked_list *variables)
 {
 	int		i;
 
@@ -290,8 +290,6 @@ void	resolve_expression(t_linked_list *syntax_tree, t_stack *previous_functions,
 	}
 	else if (expr->action == FUNCTION)
 	{
-		printf("SALUT\n");
-		fflush(stdout);
 		resolve_expression(syntax_tree, previous_functions, expr->right, variables);
 		// find the return value of the function ...
 		find_function_and_resolve(syntax_tree, previous_functions, expr);
@@ -305,10 +303,7 @@ void	resolve_expression(t_linked_list *syntax_tree, t_stack *previous_functions,
 	{
 		// find the variable referenced and assign its type to the node, if not found, reference to nothing, error
 		if (var_in_list(expr->repr, variables))
-		{
 			expr->type = typeof_var_in_list(expr->repr, variables);
-			printf("expr->type : %d\n", expr->type);
-		}
 		else
 		{
 			ft_putstr("Variable referenced before assignement.\n");
@@ -319,10 +314,7 @@ void	resolve_expression(t_linked_list *syntax_tree, t_stack *previous_functions,
 	{
 		resolve_expression(syntax_tree, previous_functions, expr->right, variables);
 		if (!expr->left->type || expr->left->type == expr->right->type - LIST)
-		{
-			printf("val : %d\n", expr->right->type);
 			expr->left->type = expr->right->type - LIST;
-		}
 		else
 		{
 			ft_putstr("Trying to assign from incompatible types.\n");
@@ -334,11 +326,7 @@ void	resolve_expression(t_linked_list *syntax_tree, t_stack *previous_functions,
 	else if (expr->action == RETURN)
 	{
 		// resolve the type returned and set the function (on top of previous_functions) return type
-		printf("BEFORE RESOLVING\n");
-		fflush(stdout);
 		resolve_expression(syntax_tree, previous_functions, expr->right, variables);
-		printf("AFTER RESOLVING\n");
-		fflush(stdout);
 		expr->type = expr->right->type;
 		if (((t_node*)((t_sub_elt*)((t_linked_list*)previous_functions->elts[previous_functions->last - 1])->elts[0])->elt)->type
 			&& ((t_node*)((t_sub_elt*)((t_linked_list*)previous_functions->elts[previous_functions->last - 1])->elts[0])->elt)->type != expr->type)
@@ -390,14 +378,10 @@ void	resolve_function(t_linked_list *syntax_tree, t_stack *previous_functions)
 	i = 0;
 	while (i < variables->len)
 	{
-		printf("SALUTTTTT0\n");
-		fflush(stdout);
 		print_tree(variables->elts[i]);
 		printf("\n");
 		i++;
 	}
-	printf("SALUTTTTT\n");
-	fflush(stdout);
 }
 
 int		parse_type(char *type)
@@ -405,7 +389,6 @@ int		parse_type(char *type)
 	int		i;
 	int		res;
 
-	printf(" TYPE_STR -> %s\n", type);
 	res = 0;
 	i = 0;
 	while (type[i])
@@ -429,7 +412,6 @@ int		parse_type(char *type)
 		res += FLOATING;
 	else if (ft_strcmp(type, "LONG") == 0)
 		res += LONG;
-	printf("\n TYPE --> %d\n", res);
 	return (res);
 }
 

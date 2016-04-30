@@ -14,8 +14,7 @@ t_node	*new_node(char action, t_node *left, t_node *right, char *repr, int type)
 	node->left = left;
 	node->right = right;
 	node->type = type;
-	if (!left && !right)
-		node->repr = ft_strdup(repr);
+	node->repr = ft_strdup(repr);
 	return (node);
 }
 

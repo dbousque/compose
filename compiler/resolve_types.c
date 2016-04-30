@@ -121,15 +121,15 @@ int		are_function_equal(t_node *func1, t_node *func2)
 		tmp1 = func1->right;
 		tmp2 = func2->right;
 		ok = 1;
-		while (ok && tmp1->left && tmp2->left)
+		while (ok && tmp1 && tmp2)
 		{
-			if (tmp1->left->type != tmp2->left->type)
+			if (tmp1->right->type != tmp2->right->type)
 				ok = 0;
-			tmp1 = tmp1->right;
-			tmp2 = tmp2->right;
+			tmp1 = tmp1->left;
+			tmp2 = tmp2->left;
 		}
 		// if arguments match
-		if (ok && !tmp1->left && !tmp2->left)
+		if (ok && !tmp1 && !tmp2)
 			return (1);
 	}
 	return (0);
@@ -443,7 +443,7 @@ t_node	*descr_to_node(char *descr)
 			i++;
 		}
 	}
-	res = new_node(FUNCTION_DECL, new_node(0, NULL, NULL, tabs[1], 0), tmp_node, "", ret_type);
+	res = new_node(FUNCTION_DECL, new_node(0, NULL, NULL, tabs[1], 0), tmp_node, tabs[3], ret_type);
 	return (res);
 }
 

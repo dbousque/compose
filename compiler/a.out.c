@@ -2,33 +2,10 @@
 
 #include "../language/Compose.h"
 
-int	__second_func(int ___lol)
+t_string*	__my_func(t_string* ___string, int ___to_add)
 {
-	int	___a;
 
-	___a = __second_func(12);
-	return 24;
-}
-
-int	__first_function(int ___a, int ___i)
-{
-	int	___b1;
-	float	___b2;
-	long	___b3;
-	long	___b8;
-	double	___b4;
-	long	___b7;
-	t_string*	___b5;
-
-	___b1 = 12;
-	___b2 = 2.0;
-	___b3 = 12;
-	___b8 = ((3 + 5) * 4 - 1) * 7;
-	___b4 = 2.0;
-	___b7 = ___b3;
-	___b5 = _str_long(___b3);
-	_print_str(___b5);
-	return _int_double(___i + ___a + ___b4);
+	return _new_str_add_str_str(_new_str_add_str_int(_new_str_add_str_str(___string, _new_string_chars_int(" : to_add==", 11)), ___to_add), _new_string_chars_int(".", 1));
 }
 
 void	__main(t_list* ___args)
@@ -40,10 +17,8 @@ void	__main(t_list* ___args)
 	for (int ____i2 = 0; ____i2 < ____to_iter2->len; ____i2++)
 	{
 		___elt = (t_string*)____to_iter2->elts[____i2];
-		_print_str(___elt);
-		_print_int(__first_function(2, 5));
+		_print_str(__my_func(_new_string_chars_int("line_start", 10), _int_str(___elt)));
 	}
-	_print_str(_new_string_chars_int("ok", 2));
 }
 
 int		main(int argc, char **argv)

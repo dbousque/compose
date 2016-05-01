@@ -1,0 +1,8 @@
+
+
+def my_func(str string, int to_add):
+	return string + " : to_add==" + to_add + "."
+
+def main(str[] args):
+	for elt in args:
+		print(my_func("line_start", int(elt)))

@@ -41,6 +41,23 @@ char	*get_type_str(int type)
 	return (NULL);
 }
 
+void	write_proto_arg(int fd, t_node *elt)
+{
+	char	*tmp_str;
+
+	if (!elt)
+		return ;
+	if (elt->left)
+	{
+		write_proto_arg(fd, elt->left);
+		write(fd, ", ", 2);
+	}
+	tmp_str = get_type_str(elt->right->type);
+	write(fd, tmp_str, ft_strlen(tmp_str));
+	write(fd, " ___", 4);
+	write(fd, elt->right->repr, ft_strlen(elt->right->repr));
+}
+
 void	write_function_prototype(int fd, t_linked_list *function)
 {
 	t_node	*prototype;
@@ -54,16 +71,7 @@ void	write_function_prototype(int fd, t_linked_list *function)
 	write(fd, prototype->left->repr, ft_strlen(prototype->left->repr));
 	write(fd, "(", 1);
 	tmp_node = prototype->right;
-	while (tmp_node)
-	{
-		tmp_str = get_type_str(tmp_node->right->type);
-		write(fd, tmp_str, ft_strlen(tmp_str));
-		write(fd, " ___", 4);
-		write(fd, tmp_node->right->repr, ft_strlen(tmp_node->right->repr));
-		if (tmp_node->left)
-			write(fd, ", ", 2);
-		tmp_node = tmp_node->left;
-	}
+	write_proto_arg(fd, tmp_node);
 	write(fd, ")\n{\n", 4);
 }
 
@@ -176,7 +184,18 @@ void	write_instruction(int fd, t_node *instr, int indentation)
 		// string appending
 		if (instr->left->type == STRING)
 		{
-			tmp_str = "_new_str_add_str_str(";
+			if (instr->right->type == STRING)
+				tmp_str = "_new_str_add_str_str(";
+			else if (instr->right->type == CHAR)
+				tmp_str = "_new_str_add_str_char(";
+			else if (instr->right->type == INTEGER)
+				tmp_str = "_new_str_add_str_int(";
+			else if (instr->right->type == LONG)
+				tmp_str = "_new_str_add_str_long(";
+			else if (instr->right->type == FLOATING)
+				tmp_str = "_new_str_add_str_float(";
+			else if (instr->right->type == DOUBLE)
+				tmp_str = "_new_str_add_str_double(";
 			write(fd, tmp_str, ft_strlen(tmp_str));
 			write_instruction(fd, instr->left, 0);
 			write(fd, ", ", 2);

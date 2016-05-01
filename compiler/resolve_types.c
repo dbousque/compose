@@ -102,9 +102,7 @@ int		different_types_merge(int type1, int type2, char operation)
 
 	if (in_chartab(type1, numbers) && in_chartab(type2, numbers))
 		return (take_highest_number(type1, type2, numbers));
-	if (operation == ADD && type1 == STRING && type2 == STRING)
-		return (STRING);
-	if (operation == ADD && type1 == STRING && type2 == CHAR)
+	if (operation == ADD && type1 == STRING)
 		return (STRING);
 	return (0);
 }
@@ -250,7 +248,7 @@ void	find_function_and_resolve(t_linked_list *syntax_tree, t_stack *previous_fun
 		}
 		else
 		{
-			ft_putstr("Undefined reference to a function.\n");
+			printf("Undefined reference to a function : %s\n", function_call->left->repr);
 			exit(1);
 		}
 	}
